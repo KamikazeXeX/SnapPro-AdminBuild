@@ -287,9 +287,10 @@ if (_hasRequiredTools && _hasbuilditem) then {
 	//cutText [(localize "str_epoch_player_45"), "PLAIN DOWN"];
 	_objHDiff = 0;
 
-if (isClass (missionConfigFile >> "SnapBuilding" >> _classname)) then {	
-	["","","",["Init",_object,_classname,_objectHelper]] spawn snap_build;
-};
+	if (isClass (missionConfigFile >> "SnapBuilding" >> _classname)) then {	
+		["","","",["Init",_object,_classname,_objectHelper]] spawn snap_build;
+	};
+	
 	while {_isOk} do {
 		_zheightchanged = false;
 		_zheightdirection = "";
@@ -536,8 +537,7 @@ if (isClass (missionConfigFile >> "SnapBuilding" >> _classname)) then {
 
 		if (DZE_StaticConstructionCount > 0) then {
 			_limit = DZE_StaticConstructionCount;
-		}
-		else {
+		} else {
 			if (isNumber (configFile >> "CfgVehicles" >> _classname >> "constructioncount")) then {
 				_limit = getNumber(configFile >> "CfgVehicles" >> _classname >> "constructioncount");
 			};
@@ -741,5 +741,4 @@ if (isClass (missionConfigFile >> "SnapBuilding" >> _classname)) then {
 		cutText [format[(localize "str_epoch_player_47"),_text,_reason], "PLAIN DOWN"];
 	};
 };
-
 DZE_ActionInProgress = false;
