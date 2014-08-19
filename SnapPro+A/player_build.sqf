@@ -457,12 +457,11 @@ if (_hasRequiredTools && _hasbuilditem) then {
 			detach _objectHelper;
 			deleteVehicle _objectHelper;
 		};
-			
-		if(_location1 distance _objectHelperPos > 10) exitWith {
+		
+		if(_location1 distance _objectHelperPos > 20) exitWith {
 			_isOk = false;
 			_cancel = true;
-
-			_reason = "Object is placed to far away from where you started building (within 10 meters)";
+			_reason = "Object is placed to far away from where you started building (within 20 meters)";
 			detach _object;
 			deleteVehicle _object;
 
@@ -470,12 +469,11 @@ if (_hasRequiredTools && _hasbuilditem) then {
 			deleteVehicle _objectHelper;
 		};
 
-
-		if(abs(_objHDiff) > 10) exitWith {
+		if(abs(_objHDiff) > 20) exitWith {
 
 			_isOk = false;
 			_cancel = true;
-			_reason = "Cannot move up or down more than 10 meters";
+			_reason = "Cannot move up or down more than 20 meters";
 			detach _object;
 			deleteVehicle _object;
 
