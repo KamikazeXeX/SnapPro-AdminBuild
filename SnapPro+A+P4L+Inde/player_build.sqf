@@ -3,13 +3,14 @@
 	Made for DayZ Epoch please ask permission to use/edit/distrubute email vbawol@veteranbastards.com.
 */
 /*
-Snap Build Pro w/Admin Fast Build+Upgrade
+Snap Build Pro w/Admin Fast Build+Upgrade + A Plot For Life
 
 Edited by KamikazeXeX from XeXGaming www.xexgaming.com
-Date: 16/8/14
-SnapBuildPro v1.3.1
+Date: 27/8/14
+SnapBuildPro v1.4
 */
-private ["_helperColor","_objectHelper","_objectHelperDir","_objectHelperPos","_canDo","_location","_dir","_classname","_item","_hasRequiredTools","_missingT","_missingB","_hasrequireditem","_missing","_hastoolweapon","_cancel","_reason","_started","_finished","_animState","_isMedic","_dis","_sfx","_hasbuilditem","_tmpbuilt","_onLadder","_isWater","_require","_text","_offset","_IsNearPlot","_isOk","_location1","_location2","_counter","_limit","_proceed","_num_removed","_position","_object","_canBuildOnPlot","_friendlies","_nearestPole","_ownerID","_findNearestPoles","_findNearestPole","_distance","_classnametmp","_ghost","_isPole","_needText","_lockable","_zheightchanged","_rotate","_combination_1","_combination_2","_combination_3","_combination_4","_combination","_combination_1_Display","_combinationDisplay","_zheightdirection","_abort","_isNear","_need","_needNear","_vehicle","_inVehicle","_requireplot","_objHupDiff","_objHDiff","_isLandFireDZ","_isTankTrap","_isNear2","_typeIsString","_isBuildAdmin","_needBuildItem","_hasbuilditems","_itemIn","_countIn","_qty","_missingQty","_textMissing","_removed","_tobe_removed_total","_removed_total","_ownerPUID","_playerUID"];
+private ["_helperColor","_objectHelper","_objectHelperDir","_objectHelperPos","_canDo", "_pos", "_cnt",
+"_location","_dir","_classname","_item","_hasRequiredTools","_missingT","_missingB","_hasrequireditem","_missing","_hastoolweapon","_cancel","_reason","_started","_finished","_animState","_isMedic","_dis","_sfx","_hasbuilditem","_tmpbuilt","_onLadder","_isWater","_require","_text","_offset","_IsNearPlot","_isOk","_location1","_location2","_counter","_limit","_proceed","_num_removed","_position","_object","_canBuildOnPlot","_friendlies","_nearestPole","_ownerID","_findNearestPoles","_findNearestPole","_distance","_classnametmp","_ghost","_isPole","_needText","_lockable","_zheightchanged","_rotate","_combination_1","_combination_2","_combination_3","_combination_4","_combination","_combination_1_Display","_combinationDisplay","_zheightdirection","_abort","_isNear","_need","_needNear","_vehicle","_inVehicle","_requireplot","_objHupDiff","_objHDiff","_isLandFireDZ","_isTankTrap","_isNear2","_typeIsString","_isBuildAdmin","_needBuildItem","_hasbuilditems","_itemIn","_countIn","_qty","_missingQty","_textMissing","_removed","_tobe_removed_total","_removed_total","_ownerPUID","_playerUID"];
 
 if(DZE_ActionInProgress) exitWith { cutText [(localize "str_epoch_player_40") , "PLAIN DOWN"]; };
 DZE_ActionInProgress = true;
@@ -17,20 +18,13 @@ DZE_ActionInProgress = true;
 // disallow building if too many objects are found within 30m
 if((count ((getPosATL player) nearObjects ["All",30])) >= DZE_BuildingLimit) exitWith {DZE_ActionInProgress = false; cutText [(localize "str_epoch_player_41"), "PLAIN DOWN"];};
 
-_onLadder =		(getNumber (configFile >> "CfgMovesMaleSdr" >> "States" >> (animationState player) >> "onLadder")) == 1;
-_isWater = 		dayz_isSwimming;
-_cancel = false;
-_reason = "";
-_canBuildOnPlot = false;
-_isBuildAdmin = (getPlayerUID player) in WG_adminBuild;
-
-_vehicle = vehicle player;
-_inVehicle = (_vehicle != player);
-
 //snap vars -- temporary fix for errors so variables.sqf can be skipped
 if (isNil "snapProVariables") then {
 	if (isNil "DZE_snapExtraRange") then {
 		DZE_snapExtraRange = 0;
+	};
+	if (isNil "DZE_checkNearbyRadius") then {
+		DZE_checkNearbyRadius = 30;
 	};
 	s_player_toggleSnap = -1;
 	s_player_toggleSnapSelect = -1;
@@ -42,7 +36,24 @@ if (isNil "snapProVariables") then {
 };
 // snap vars
 
+// disallow building if too many objects are found within (30m by default) add DZE_checkNearbyRadius = 30; to your init.sqf to change
+_pos = [player] call FNC_GetPos;
+_cnt = count (_pos nearObjects ["All",DZE_checkNearbyRadius]); 
+ if (_cnt >= DZE_BuildingLimit) exitWith { //end script if too many objects nearby
+ 	DZE_ActionInProgress = false;
+ 	cutText [(localize "str_epoch_player_41"), "PLAIN DOWN"];
+};
+_onLadder =		(getNumber (configFile >> "CfgMovesMaleSdr" >> "States" >> (animationState player) >> "onLadder")) == 1;
+_isWater = 		dayz_isSwimming;
+_cancel = false;
+_reason = "";
+_canBuildOnPlot = false;
+_isBuildAdmin = (getPlayerUID player) in WG_adminBuild;
+
+_vehicle = vehicle player;
+_inVehicle = (_vehicle != player);
 _playerUID = getPlayerUID player;
+
 helperDetach = false;
 _canDo = (!r_drag_sqf and !r_player_unconscious);
 
@@ -265,7 +276,7 @@ if (_hasRequiredTools && _hasbuilditem) then {
 	_isOk = true;
 
 	// get inital players position
-	_location1 = getPosATL player;
+	_location1 = [player] call FNC_GetPos;
 	_dir = getDir player;
 
 	// if ghost preview available use that instead
@@ -278,13 +289,9 @@ if (_hasRequiredTools && _hasbuilditem) then {
 	_objectHelper = "Sign_sphere10cm_EP1" createVehicle _location;
 	_helperColor = "#(argb,8,8,3)color(0,0,0,0,ca)";
 	_objectHelper setobjecttexture [0,_helperColor];
-
 	_objectHelper attachTo [player,_offset];
 	_object attachTo [_objectHelper,[0,0,0]];
-	_position = getPosATL _objectHelper;
-	
-	
-	//cutText [(localize "str_epoch_player_45"), "PLAIN DOWN"];
+	_position = [_objectHelper] call FNC_GetPos;
 	_objHDiff = 0;
 
 	if (isClass (missionConfigFile >> "SnapBuilding" >> _classname)) then {	
@@ -292,6 +299,7 @@ if (_hasRequiredTools && _hasbuilditem) then {
 	};
 	
 	while {_isOk} do {
+
 		_zheightchanged = false;
 		_zheightdirection = "";
 		_rotate = false;
@@ -301,63 +309,66 @@ if (_hasRequiredTools && _hasbuilditem) then {
 			_zheightdirection = "up";
 			_zheightchanged = true;
 		};
+		
 		if (DZE_Z) then {
 			DZE_Z = false;
 			_zheightdirection = "down";
 			_zheightchanged = true;
 		};
+		
 		if (DZE_Q_alt) then {
 			DZE_Q_alt = false;
 			_zheightdirection = "up_alt";
 			_zheightchanged = true;
 		};
+		
 		if (DZE_Z_alt) then {
 			DZE_Z_alt = false;
 			_zheightdirection = "down_alt";
 			_zheightchanged = true;
 		};
+		
 		if (DZE_Q_ctrl) then {
 			DZE_Q_ctrl = false;
 			_zheightdirection = "up_ctrl";
 			_zheightchanged = true;
 		};
+		
 		if (DZE_Z_ctrl) then {
 			DZE_Z_ctrl = false;
 			_zheightdirection = "down_ctrl";
 			_zheightchanged = true;
 		};
+		
 		if (DZE_4) then {
 			_rotate = true;
 			DZE_4 = false;
-			if (helperDetach) then {
-				_dir = -45;
-			} else {
-				_dir = 180;
-			};
+
+			_dir = -45;
 		};
+		
 		if (DZE_6) then {
 			_rotate = true;
 			DZE_6 = false;
-			if (helperDetach) then {
-				_dir = 45;
-			} else {
-				_dir = 0;
-			};
+
+			_dir = 45;
 		};
 		
 		if (DZE_F and _canDo) then {	
 			if (helperDetach) then {
-			_objectHelperDir = getDir _objectHelper; 
-			_objectHelper attachTo [player];
-			_objectHelper setDir _objectHelperDir-(getDir player);
-			helperDetach = false;
+				_objectHelperDir = getDir _objectHelper; 
+				_objectHelper attachTo [player];
+
+				_objectHelper setDir _objectHelperDir-(getDir player);
+				helperDetach = false;
 			} else {
-			_objectHelperPos = getPosATL _objectHelper;
-			detach _objectHelper;			
-			_objectHelper setPosATL _objectHelperPos;
-			_objectHelperDir = getDir _objectHelper;
-			_objectHelper setVelocity [0,0,0]; //fix sliding glitch
-			helperDetach = true;
+				_objectHelperDir = getDir _objectHelper;
+				detach _objectHelper;
+
+
+				[_objectHelper]	call FNC_GetSetPos;
+				_objectHelper setVelocity [0,0,0]; //fix sliding glitch
+				helperDetach = true;
 			};
 			DZE_F = false;
 		};
@@ -365,28 +376,34 @@ if (_hasRequiredTools && _hasbuilditem) then {
 		if(_rotate) then {
 			if (helperDetach) then {
 				_objectHelperDir = getDir _objectHelper;
-				_objectHelperPos = getPosATL _objectHelper;
+
 				_objectHelper setDir _objectHelperDir+_dir;
-				_objectHelper setPosATL _objectHelperPos;
+
+				[_objectHelper]	call FNC_GetSetPos;
 			} else {
-				_objectHelper setDir _dir;
-				_objectHelper setPosATL _position;
-				//diag_log format["DEBUG Rotate BUILDING POS: %1", _position];
+				detach _objectHelper;
+				_objectHelperDir = getDir _objectHelper;
+				_objectHelper setDir _objectHelperDir+_dir;
+				[_objectHelper]	call FNC_GetSetPos;
+				_objectHelperDir = getDir _objectHelper;
+				_objectHelper attachTo [player];
+				_objectHelper setDir _objectHelperDir-(getDir player);		
 			};
-
 		};
-
 		if(_zheightchanged) then {
 			if (!helperDetach) then {
-			detach _objectHelper;
+				detach _objectHelper;
+				_objectHelperDir = getDir _objectHelper;
 			};
 
-			_position = getPosATL _objectHelper;
+
+			_position = [_objectHelper] call FNC_GetPos;
 
 			if(_zheightdirection == "up") then {
 				_position set [2,((_position select 2)+0.1)];
 				_objHDiff = _objHDiff + 0.1;
 			};
+			
 			if(_zheightdirection == "down") then {
 				_position set [2,((_position select 2)-0.1)];
 				_objHDiff = _objHDiff - 0.1;
@@ -396,6 +413,7 @@ if (_hasRequiredTools && _hasbuilditem) then {
 				_position set [2,((_position select 2)+1)];
 				_objHDiff = _objHDiff + 1;
 			};
+			
 			if(_zheightdirection == "down_alt") then {
 				_position set [2,((_position select 2)-1)];
 				_objHDiff = _objHDiff - 1;
@@ -405,37 +423,42 @@ if (_hasRequiredTools && _hasbuilditem) then {
 				_position set [2,((_position select 2)+0.01)];
 				_objHDiff = _objHDiff + 0.01;
 			};
+			
 			if(_zheightdirection == "down_ctrl") then {
 				_position set [2,((_position select 2)-0.01)];
 				_objHDiff = _objHDiff - 0.01;
 			};
 
-			_objectHelper setDir (getDir _objectHelper);
+
 
 			if((_isAllowedUnderGround == 0) && ((_position select 2) < 0)) then {
 				_position set [2,0];
 			};
 
-			_objectHelper setPosATL _position;
-
-			//diag_log format["DEBUG Change BUILDING POS: %1", _position];
+			if (surfaceIsWater _position) then {
+				_objectHelper setPosASL _position;
+			} else {
+				_objectHelper setPosATL _position;
+			};
 
 			if (!helperDetach) then {
 			_objectHelper attachTo [player];
+			_objectHelper setDir _objectHelperDir-(getDir player);
 			};
 		};
 
 		sleep 0.5;
 
-		_location2 = getPosATL player;
-		_objectHelperPos = getPosATL _objectHelper;
+		_location2 = [player] call FNC_GetPos;
+		_objectHelperPos = [_objectHelper] call FNC_GetPos;
 
 		if(DZE_5) exitWith {
 			_isOk = false;
+			_position = [_object] call FNC_GetPos;
 			detach _object;
 			_dir = getDir _object;
-			_position = getPosATL _object;
-			//diag_log format["DEBUG BUILDING POS: %1", _position];
+
+
 			deleteVehicle _object;
 
 			detach _objectHelper;
@@ -475,7 +498,6 @@ if (_hasRequiredTools && _hasbuilditem) then {
 			detach _objectHelper;
 			deleteVehicle _objectHelper;
 		};
-
 
 		if (player getVariable["combattimeout", 0] >= time) exitWith {
 			_isOk = false;
@@ -530,7 +552,12 @@ if (_hasRequiredTools && _hasbuilditem) then {
 			_location set [2,0];
 		};
 	
-		_tmpbuilt setPosATL _location;
+		if (surfaceIsWater _location) then {
+			_tmpbuilt setPosASL _location;
+			_location = ASLtoATL _location;
+		} else {
+			_tmpbuilt setPosATL _location;
+		};
 		cutText [format[(localize "str_epoch_player_138"),_text], "PLAIN DOWN"];
 		
 		_limit = 3;
@@ -741,4 +768,5 @@ if (_hasRequiredTools && _hasbuilditem) then {
 		cutText [format[(localize "str_epoch_player_47"),_text,_reason], "PLAIN DOWN"];
 	};
 };
+
 DZE_ActionInProgress = false;
