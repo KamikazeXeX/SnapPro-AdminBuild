@@ -9,14 +9,16 @@ Edited by KamikazeXeX from XeXGaming www.xexgaming.com
 Date: 27/8/14
 SnapBuildPro v1.4
 */
-private ["_helperColor","_objectHelper","_objectHelperDir","_objectHelperPos","_canDo", "_pos", "_cnt",
-"_location","_dir","_classname","_item","_hasRequiredTools","_missingT","_missingB","_hasrequireditem","_missing","_hastoolweapon","_cancel","_reason","_started","_finished","_animState","_isMedic","_dis","_sfx","_hasbuilditem","_tmpbuilt","_onLadder","_isWater","_require","_text","_offset","_IsNearPlot","_isOk","_location1","_location2","_counter","_limit","_proceed","_num_removed","_position","_object","_canBuildOnPlot","_friendlies","_nearestPole","_ownerID","_findNearestPoles","_findNearestPole","_distance","_classnametmp","_ghost","_isPole","_needText","_lockable","_zheightchanged","_rotate","_combination_1","_combination_2","_combination_3","_combination_4","_combination","_combination_1_Display","_combinationDisplay","_zheightdirection","_abort","_isNear","_need","_needNear","_vehicle","_inVehicle","_requireplot","_objHupDiff","_objHDiff","_isLandFireDZ","_isTankTrap","_isNear2","_typeIsString","_isBuildAdmin","_needBuildItem","_hasbuilditems","_itemIn","_countIn","_qty","_missingQty","_textMissing","_removed","_tobe_removed_total","_removed_total"];
+private ["_helperColor","_objectHelper","_objectHelperDir","_objectHelperPos","_canDo", "_pos", "_cnt","_location","_dir","_classname","_item","_hasRequiredTools","_missingT","_missingB","_hasrequireditem","_missing",
+"_hastoolweapon","_cancel","_reason","_started","_finished","_animState","_isMedic","_dis","_sfx","_hasbuilditem","_tmpbuilt","_onLadder","_isWater","_require","_text","_offset","_IsNearPlot",
+"_isOk","_location1","_location2","_counter","_limit","_proceed","_num_removed","_position","_object","_canBuildOnPlot","_friendlies","_nearestPole","_ownerID","_findNearestPoles","_findNearestPole",
+"_distance","_classnametmp","_ghost","_isPole","_needText","_lockable","_zheightchanged","_rotate","_combination_1","_combination_2","_combination_3","_combination_4","_combination",
+"_combination_1_Display","_combinationDisplay","_zheightdirection","_abort","_isNear","_need","_needNear","_vehicle","_inVehicle","_previewCounter","_requireplot","_objHupDiff",
+"_objHDiff","_isLandFireDZ","_isTankTrap","_isNear2","_typeIsString","_isBuildAdmin","_needBuildItem","_hasbuilditems","_itemIn","_countIn","_qty","_missingQty","_textMissing",
+"_removed","_tobe_removed_total","_removed_total","_isAllowedUnderGround"];
 
 if(DZE_ActionInProgress) exitWith { cutText [(localize "str_epoch_player_40") , "PLAIN DOWN"]; };
 DZE_ActionInProgress = true;
-
-// disallow building if too many objects are found within 30m
-if((count ((getPosATL player) nearObjects ["All",30])) >= DZE_BuildingLimit) exitWith {DZE_ActionInProgress = false; cutText [(localize "str_epoch_player_41"), "PLAIN DOWN"];};
 
 //snap vars -- temporary fix for errors so variables.sqf can be skipped
 if (isNil "snapProVariables") then {
@@ -100,7 +102,7 @@ if (_typeIsString) then {
 			case "fire":
 			{
 				_distance = 3;
-				_isNear = {inflamed _x} count (getPosATL player nearObjects _distance);
+				_isNear = {inflamed _x} count (_pos nearObjects _distance);
 				if(_isNear == 0) then {
 					_abort = true;
 					_reason = "fire";
@@ -109,7 +111,7 @@ if (_typeIsString) then {
 			case "workshop":
 			{
 				_distance = 3;
-				_isNear = count (nearestObjects [player, ["Wooden_shed_DZ","WoodShack_DZ","WorkBench_DZ"], _distance]);
+				_isNear = count (nearestObjects [_pos, ["Wooden_shed_DZ","WoodShack_DZ","WorkBench_DZ"], _distance]);
 				if(_isNear == 0) then {
 					_abort = true;
 					_reason = "workshop";
@@ -118,7 +120,7 @@ if (_typeIsString) then {
 			case "fueltank":
 			{
 				_distance = 30;
-				_isNear = count (nearestObjects [player, dayz_fuelsources, _distance]);
+				_isNear = count (nearestObjects [_pos, dayz_fuelsources, _distance]);
 				if(_isNear == 0) then {
 					_abort = true;
 					_reason = "fuel tank";
@@ -299,9 +301,9 @@ if (_hasRequiredTools && _hasbuilditem) then {
 	_objHDiff = 0;
 
 
-if (isClass (missionConfigFile >> "SnapBuilding" >> _classname)) then {	
-	["","","",["Init",_object,_classname,_objectHelper]] spawn snap_build;
-};
+	if (isClass (missionConfigFile >> "SnapBuilding" >> _classname)) then {	
+		["","","",["Init",_object,_classname,_objectHelper]] spawn snap_build;
+	};
 
 	while {_isOk} do {
 
@@ -504,15 +506,18 @@ if (isClass (missionConfigFile >> "SnapBuilding" >> _classname)) then {
 			deleteVehicle _objectHelper;
 		};
 		
-		if(_location1 distance _objectHelperPos > 20) exitWith {
-			_isOk = false;
-			_cancel = true;
-			_reason = "Object is placed to far away from where you started building (within 20 meters)";
-			detach _object;
-			deleteVehicle _object;
+//  ****  The line below was giving an error that _objectHelperPos is undefined so check that the variable is defined 
+		if (!isNil "_objectHelperPos") then {
+			if(_location1 distance _objectHelperPos > 20) exitWith {
+				_isOk = false;
+				_cancel = true;
+				_reason = "Object is placed to far away from where you started building (within 20 meters)";
+				detach _object;
+				deleteVehicle _object;
 
-			detach _objectHelper;
-			deleteVehicle _objectHelper;
+				detach _objectHelper;
+				deleteVehicle _objectHelper;
+			};
 		};
 
 		if(abs(_objHDiff) > 20) exitWith {
@@ -576,7 +581,6 @@ if (isClass (missionConfigFile >> "SnapBuilding" >> _classname)) then {
 	
 		if (surfaceIsWater _location) then {
 			_tmpbuilt setPosASL _location;
-			_location = ASLtoATL _location;
 		} else {
 			_tmpbuilt setPosATL _location;
 		};
@@ -789,7 +793,8 @@ if (isClass (missionConfigFile >> "SnapBuilding" >> _classname)) then {
 
 	} else {
 		//diag_log "Cancel is TRUE";
-		deleteVehicle _tmpbuilt;
+		// ****************** Getting an undefined variable error on esc before initiating build - added a check for the case that _tempbuild is undefined
+		if (!isNil "_tempbuilt") then {deleteVehicle _tmpbuilt;};
 		cutText [format[(localize "str_epoch_player_47"),_text,_reason], "PLAIN DOWN"];
 	};
 };
