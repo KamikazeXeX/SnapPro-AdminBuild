@@ -97,7 +97,7 @@ if (_typeIsString) then {
 			case "fire":
 			{
 				_distance = 3;
-				_isNear = {inflamed _x} count (getPosATL player nearObjects _distance);
+				_isNear = {inflamed _x} count (_pos nearObjects _distance);
 				if(_isNear == 0) then {
 					_abort = true;
 					_reason = "fire";
@@ -106,7 +106,7 @@ if (_typeIsString) then {
 			case "workshop":
 			{
 				_distance = 3;
-				_isNear = count (nearestObjects [player, ["Wooden_shed_DZ","WoodShack_DZ","WorkBench_DZ"], _distance]);
+				_isNear = count (nearestObjects [_pos, ["Wooden_shed_DZ","WoodShack_DZ","WorkBench_DZ"], _distance]);
 				if(_isNear == 0) then {
 					_abort = true;
 					_reason = "workshop";
@@ -115,7 +115,7 @@ if (_typeIsString) then {
 			case "fueltank":
 			{
 				_distance = 30;
-				_isNear = count (nearestObjects [player, dayz_fuelsources, _distance]);
+				_isNear = count (nearestObjects [_pos, dayz_fuelsources, _distance]);
 				if(_isNear == 0) then {
 					_abort = true;
 					_reason = "fuel tank";
