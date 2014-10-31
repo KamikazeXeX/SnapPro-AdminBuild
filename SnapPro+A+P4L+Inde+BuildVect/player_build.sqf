@@ -266,7 +266,6 @@ if(_IsNearPlot == 0) then {
 		// disallow building plot
 		if(!_isPole) then {
 			_friendlies		= player getVariable ["friendlyTo",[]];
-
 			// check if friendly to owner
 			if(_ownerID in _friendlies) then {
 				_canBuildOnPlot = true;
