@@ -7,8 +7,9 @@ Snap Build Pro w/Admin Fast Build+Upgrade + Build Vectors
 
 Edited by KamikazeXeX from XeXGaming www.xexgaming.com
 Date: 15/8/14
+Plot For Life v2.34 (RimBlock)
 */
-private ["_location","_dir","_classname","_missing","_text","_proceed","_num_removed","_object","_missingQty","_itemIn","_countIn","_qty","_removed","_removed_total","_tobe_removed_total","_objectID","_objectUID","_temp_removed_array","_textMissing","_newclassname","_requirements","_obj","_upgrade","_lockable","_combination_1","_combination_2","_combination_3","_combination","_objectCharacterID","_canBuildOnPlot","_friendlies","_nearestPole","_ownerID","_distance","_needText","_findNearestPoles","_findNearestPole","_IsNearPlot","_isBuildAdmin"];
+private ["_location","_dir","_classname","_missing","_text","_proceed","_num_removed","_object","_missingQty","_itemIn","_countIn","_qty","_removed","_removed_total","_tobe_removed_total","_objectID","_objectUID","_temp_removed_array","_textMissing","_newclassname","_requirements","_obj","_upgrade","_lockable","_combination_1","_combination_2","_combination_3","_combination","_objectCharacterID","_canBuildOnPlot","_friendlies","_nearestPole","_ownerID","_distance","_needText","_findNearestPoles","_findNearestPole","_IsNearPlot","_isBuildAdmin","_playerUID"];
 
 if(DZE_ActionInProgress) exitWith { cutText [(localize "str_epoch_player_52") , "PLAIN DOWN"]; };
 DZE_ActionInProgress = true;
@@ -44,7 +45,11 @@ if(_IsNearPlot == 0) then {
 
 	// Find owner 
 	_ownerID = _nearestPole getVariable["ownerPUID","0"];
-	_playerUID = getPlayerUID player;
+	if (DZE_APlotforLife) then {
+		_playerUID = [player] call FNC_GetPlayerUID;
+	}else{
+		_playerUID = dayz_characterID;
+	};
 
 	// diag_log format["DEBUG BUILDING: %1 = %2", dayz_characterID, _ownerID];
 
@@ -190,7 +195,8 @@ if ((count _upgrade) > 0) then {
 				cutText [format[(localize "str_epoch_player_159"),_text], "PLAIN DOWN", 5];
 			};
 
-			PVDZE_obj_Swap = [_objectCharacterID,_object,[_dir,_location,_vector,_ownerID],_classname,_obj,player];
+			_playerUID = [player] call FNC_GetPlayerUID;
+			PVDZE_obj_Swap = [_objectCharacterID,_object,[_dir,_location,_vector,_playerUID],_classname,_obj,player];
 			publicVariableServer "PVDZE_obj_Swap";
 
 			player reveal _object;

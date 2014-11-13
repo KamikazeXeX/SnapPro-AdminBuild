@@ -7,10 +7,12 @@ Snap Build Pro w/Admin Fast Build+Upgrade + A Plot For Life + Build Vectors
 
 Edited by KamikazeXeX from XeXGaming www.xexgaming.com
 Date: 27/10/14
-SnapBuildPro v1.4.1
+SnapBuildPro v1.4.1 (Raymix)
+Plot For Life v2.34 (RimBlock)
+Build Vectors v3 (Striker)
 */
 private ["_helperColor","_objectHelper","_objectHelperDir","_objectHelperPos","_canDo", "_pos", "_cnt",
-"_location","_dir","_classname","_item","_hasRequiredTools","_missingT","_missingB","_hasrequireditem","_missing","_hastoolweapon","_cancel","_reason","_started","_finished","_animState","_isMedic","_dis","_sfx","_hasbuilditem","_tmpbuilt","_onLadder","_isWater","_require","_text","_offset","_IsNearPlot","_isOk","_location1","_location2","_counter","_limit","_proceed","_num_removed","_position","_object","_canBuildOnPlot","_friendlies","_nearestPole","_ownerID","_findNearestPoles","_findNearestPole","_distance","_classnametmp","_ghost","_isPole","_needText","_lockable","_zheightchanged","_rotate","_combination_1","_combination_2","_combination_3","_combination_4","_combination","_combination_1_Display","_combinationDisplay","_zheightdirection","_abort","_isNear","_need","_needNear","_vehicle","_inVehicle","_requireplot","_objHDiff","_isLandFireDZ","_isTankTrap","_isNear2","_typeIsString","_isBuildAdmin","_needBuildItem","_hasbuilditems","_itemIn","_countIn","_qty","_missingQty","_textMissing","_removed","_tobe_removed_total","_removed_total","_ownerPUID","_playerUID"];
+"_location","_dir","_classname","_item","_hasRequiredTools","_missingT","_missingB","_hasrequireditem","_missing","_hastoolweapon","_cancel","_reason","_started","_finished","_animState","_isMedic","_dis","_sfx","_hasbuilditem","_tmpbuilt","_onLadder","_isWater","_require","_text","_offset","_IsNearPlot","_isOk","_location1","_location2","_counter","_limit","_proceed","_num_removed","_position","_object","_canBuildOnPlot","_friendlies","_nearestPole","_ownerID","_findNearestPoles","_findNearestPole","_distance","_classnametmp","_ghost","_isPole","_needText","_lockable","_zheightchanged","_rotate","_combination_1","_combination_2","_combination_3","_combination_4","_combination","_combination_1_Display","_combinationDisplay","_zheightdirection","_abort","_isNear","_need","_needNear","_vehicle","_inVehicle","_requireplot","_objHDiff","_isLandFireDZ","_isTankTrap","_isNear2","_typeIsString","_isBuildAdmin","_needBuildItem","_hasbuilditems","_itemIn","_countIn","_qty","_missingQty","_textMissing","_removed","_tobe_removed_total","_removed_total","_playerID", "_playerUID","_ownerID"];
 
 if(DZE_ActionInProgress) exitWith { cutText [(localize "str_epoch_player_40") , "PLAIN DOWN"]; };
 DZE_ActionInProgress = true;
@@ -45,15 +47,20 @@ _isWater = 		dayz_isSwimming;
 _cancel = false;
 _reason = "";
 _canBuildOnPlot = false;
-_isBuildAdmin = (getPlayerUID player) in WG_adminBuild;
 
 _vehicle = vehicle player;
 _inVehicle = (_vehicle != player);
-_playerUID = getPlayerUID player;
 
 helperDetach = false;
 _canDo = (!r_drag_sqf and !r_player_unconscious);
+_isBuildAdmin = (getPlayerUID player) in WG_adminBuild;
+_playerUID = [player] call FNC_GetPlayerUID;
 
+if (DZE_APlotforLife) then {
+	_playerID = [player] call FNC_GetPlayerUID;
+}else{
+	_playerID = dayz_characterID;
+};
 _vector = [];
 fnc_SetPitchBankYaw = { 
     private ["_object","_rotations","_aroundX","_aroundY","_aroundZ","_dirX","_dirY","_dirZ","_upX","_upY","_upZ","_dir","_up","_dirXTemp",
@@ -255,7 +262,7 @@ if(_IsNearPlot == 0) then {
 	//diag_log format["Player_build start: [PlayerUID = %1]  [OwnerID = %2]", _playerUID, _ownerID];
 
 	// check if friendly to owner
-	if(_playerUID == _ownerID) then {  //Keep ownership
+	if(_playerID == _ownerID) then {  //Keep ownership
 		// owner can build anything within his plot except other plots
 		diag_log text "Player is owner";
 		if(!_isPole) then {
@@ -484,8 +491,8 @@ if (_hasRequiredTools && _hasbuilditem) then {
 			};
 
 			if (!helperDetach) then {
-			_objectHelper attachTo [player];
-			_objectHelper setDir _objectHelperDir-(getDir player);
+				_objectHelper attachTo [player];
+				_objectHelper setDir _objectHelperDir-(getDir player);
 			};
 			[_objectHelper,[DZE_memForBack,DZE_memLeftRight,DZE_memDir]] call fnc_SetPitchBankYaw;
 		};
@@ -790,20 +797,21 @@ if (_hasRequiredTools && _hasbuilditem) then {
 					};
 
 					_tmpbuilt setVariable ["CharacterID",_combination,true];
-					
-					_tmpbuilt setVariable ["ownerPUID",_playerUID,true];
+					_tmpbuilt setVariable ["ownerPUID",_playerID,true];
 
 					PVDZE_obj_Publish = [_combination,_tmpbuilt,[_dir,_location,_vector,_playerUID],_classname];
 					//diag_log "Publish Lockable";
 					publicVariableServer "PVDZE_obj_Publish";
 
 					cutText [format[(localize "str_epoch_player_140"),_combinationDisplay,_text], "PLAIN DOWN", 5];
+					systemChat format [(localize "str_epoch_player_140"),_combinationDisplay,_text];
 					
 
 				} else {
 					_tmpbuilt setVariable ["CharacterID",dayz_characterID,true];
+					_tmpbuilt setVariable ["ownerPUID",_playerID,true];
 					
-					_tmpbuilt setVariable ["ownerPUID",_playerUID,true];
+					
 					// fire?
 					if(_tmpbuilt isKindOf "Land_Fire_DZ") then {
 						_tmpbuilt spawn player_fireMonitor;
