@@ -15,10 +15,12 @@ Use the SnapPro+A+P4L+Inde+BuildVect files If you want the version of Snap Build
 
 Current Version as of 27/10/14
 ==================
-Update #8: Added new variant from variant 2 but now includes needed changes for build vectors.
+Update #9: Updated variant 2 + 3 to A Plot for life v2.34
 
 Version History
 ==================
+
+Update #9: Updated variant 2 + 3 to A Plot for life v2.34
 
 Update #8: Added new variant from variant 2 but now includes needed changes for build vectors.
 
